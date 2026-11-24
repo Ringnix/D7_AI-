@@ -1,0 +1,13 @@
+{
+    "title":  "测试采购申请D",
+    "department":  "行政部",
+    "items":  [
+                  {
+                      "itemName":  "文件柜",
+                      "unitPrice":  800,
+                      "quantity":  1,
+                      "unit":  "个"
+                  }
+              ],
+    "applicantName":  "测试员丁"
+}

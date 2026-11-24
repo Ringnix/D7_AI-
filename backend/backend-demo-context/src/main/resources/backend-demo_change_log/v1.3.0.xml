@@ -1,0 +1,113 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+    <changeSet author="zchengli" id="20261124-01-create-purchase-request-tables">
+        <createTable remarks="采购申请单主表" tableName="backend_demo_purchase_request">
+            <column name="id" remarks="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="created_user_id" remarks="创建用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="created_user_name" remarks="创建用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_time" remarks="创建时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="last_modified_user_id" remarks="最后修改用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="last_modified_user_name" remarks="最后修改用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="last_modified_time" remarks="最后修改时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="tenant_id" remarks="租户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="business_zone_id" remarks="业务空间ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="app_instance_id" remarks="应用实例ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_no" remarks="申请单号" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" remarks="申请单标题" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="applicant_name" remarks="申请人" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department" remarks="申请部门" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="total_amount" remarks="申请总金额" type="DECIMAL(14,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" remarks="申请单状态" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" remarks="备注" type="VARCHAR(500)"/>
+            <column defaultValueNumeric="0" name="version" remarks="乐观锁版本号" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cancel_reason" remarks="取消原因" type="VARCHAR(500)"/>
+            <column name="cancelled_time" remarks="取消时间" type="datetime"/>
+            <column name="approval_user_id" remarks="审批用户ID" type="BIGINT"/>
+            <column name="approval_user_name" remarks="审批人" type="VARCHAR(100)"/>
+            <column name="approval_time" remarks="审批时间" type="datetime"/>
+            <column name="approval_opinion" remarks="审批意见/驳回原因" type="VARCHAR(500)"/>
+        </createTable>
+
+        <addUniqueConstraint
+                columnNames="request_no"
+                constraintName="uk_backend_demo_purchase_request_no"
+                tableName="backend_demo_purchase_request"/>
+
+        <createIndex indexName="idx_backend_demo_purchase_request_created" tableName="backend_demo_purchase_request">
+            <column name="created_time"/>
+            <column name="id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_backend_demo_purchase_request_status" tableName="backend_demo_purchase_request">
+            <column name="status"/>
+            <column name="created_time"/>
+        </createIndex>
+
+        <createTable remarks="采购申请单子表" tableName="backend_demo_purchase_request_item">
+            <column name="id" remarks="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="request_id" remarks="采购申请单ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_name" remarks="物品名称" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="spec" remarks="规格型号" type="VARCHAR(100)"/>
+            <column name="unit" remarks="单位" type="VARCHAR(20)"/>
+            <column name="quantity" remarks="数量" type="DECIMAL(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" remarks="单价" type="DECIMAL(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" remarks="金额" type="DECIMAL(14,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="sort_no" remarks="排序号" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_backend_demo_purchase_request_item_request" tableName="backend_demo_purchase_request_item">
+            <column name="request_id"/>
+            <column name="sort_no"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,58 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+    <changeSet author="UNKNOWN" id="202301010000">
+        <createTable remarks="DEMO表" tableName="backend_demo_demo">
+            <column name="id" remarks="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="created_user_id" remarks="创建用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="created_user_name" remarks="创建用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_time" remarks="创建时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="last_modified_user_id" remarks="最后修改用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="last_modified_user_name" remarks="最后修改用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="last_modified_time" remarks="最后修改时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="tenant_id" remarks="租户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="business_zone_id" remarks="业务空间ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="app_instance_id" remarks="应用实例ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" remarks="编码" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" remarks="名称" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" remarks="描述" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" remarks="状态" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_backend_demo_demo_status" tableName="backend_demo_demo">
+            <column name="status"/>
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_backend_demo_demo_tenant" tableName="backend_demo_demo">
+            <column name="tenant_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

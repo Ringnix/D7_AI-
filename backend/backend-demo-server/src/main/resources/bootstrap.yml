@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: backend-demo-server
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:common.yaml?group=DEFAULT_GROUP
+      - optional:nacos:config.yaml?group=${spring.application.name}
+  cloud:
+    config:
+      enabled: false
+    nacos:
+      # Nacos 开关：默认关闭，避免 Nacos 未启动时阻塞服务启动；
+      # 需要注册到 Nacos（服务发现/配置中心）时，用环境变量 NACOS_ENABLED=true 打开
+      username: ${NACOS_USERNAME:}
+      password: ${NACOS_PASSWORD:}
+      discovery:
+        enabled: ${NACOS_ENABLED:false}
+        namespace: ${NACOS_NAMESPACE:local}
+      config:
+        enabled: ${NACOS_ENABLED:false}
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE:local}
+      server-addr: ${NACOS_ADDR:127.0.0.1:8848}

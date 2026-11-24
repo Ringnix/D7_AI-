@@ -1,0 +1,43 @@
+node_modules
+package-lock.json
+.DS_Store
+dist
+.npmrc
+.cache
+#public/theme.less
+tests/server/static
+tests/server/static/upload
+
+.local
+# local env files
+.env.local
+.env.*.local
+.eslintcache
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+# .vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+/src/**/*.js
+/src/**/*.js.map
+/src/**/*.jsx
+/src/**/*.jsx.map
+/windi.config.js
+/windi.config.js.map
+main.js
+main.js.map
+/mp-uc-api
+
+#yarn.lock

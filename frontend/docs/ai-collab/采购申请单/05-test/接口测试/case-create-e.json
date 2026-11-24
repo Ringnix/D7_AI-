@@ -1,0 +1,13 @@
+{
+    "title":  "测试采购申请E",
+    "department":  "研发部",
+    "items":  [
+                  {
+                      "itemName":  "测试仪",
+                      "unitPrice":  500,
+                      "quantity":  1,
+                      "unit":  "台"
+                  }
+              ],
+    "applicantName":  "测试员戊"
+}

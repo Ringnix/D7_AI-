@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.cyberway.mp.demo</groupId>
+	<artifactId>backend-demo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>backend-demo</name>
+	<description>Demo project for Spring Boot</description>
+	<modules>
+		<module>backend-demo-api</module>
+		<module>backend-demo-context</module>
+		<module>backend-demo-starter</module>
+		<module>backend-demo-feign-starter</module>
+		<module>backend-demo-server</module>
+		<module>backend-demo-consumer-server</module>
+	</modules>
+	<properties>
+		<argLine>-Dfile.encoding=UTF-8</argLine>
+		<java.version>17</java.version>
+		<mysql.version>8.0.30</mysql.version>
+		<spring.boot.version>3.4.8</spring.boot.version>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.cyberway.mp.dep</groupId>
+				<artifactId>mp-dependencies</artifactId>
+				<version>1.21.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.2</version>
+			</plugin>
+		</plugins>
+	</build>
+	<repositories>
+		<repository>
+			<id>cyberway</id>
+			<name>cyberway</name>
+			<url>https://nexus.cyberway.com.cn/repository/maven-public/</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Cyberway Release Repository</name>
+			<url>https://nexus.cyberway.com.cn/repository/maven-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>Cyberway Snapshot Repository</name>
+			<url>https://nexus.cyberway.com.cn/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

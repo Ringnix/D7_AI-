@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyberway.mp.demo.backenddemo.domain.purchase.repository.PurchaseRequestItemRepository">
+
+    <resultMap id="PurchaseRequestItemResultMap" type="com.cyberway.mp.demo.backenddemo.domain.purchase.entity.PurchaseRequestItem">
+        <id property="id" column="id"/>
+        <result property="requestId" column="request_id"/>
+        <result property="itemName" column="item_name"/>
+        <result property="spec" column="spec"/>
+        <result property="unit" column="unit"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="amount" column="amount"/>
+        <result property="sortNo" column="sort_no"/>
+    </resultMap>
+
+    <select id="findByRequestId" resultMap="PurchaseRequestItemResultMap">
+        select id, request_id, item_name, spec, unit, quantity, unit_price, amount, sort_no
+        from backend_demo_purchase_request_item
+        where request_id = #{requestId}
+        order by sort_no asc, id asc
+    </select>
+
+    <delete id="deleteByRequestId">
+        delete from backend_demo_purchase_request_item
+        where request_id = #{requestId}
+    </delete>
+</mapper>

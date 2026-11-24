@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: backend-demo-consumer-server
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:common.yaml?group=DEFAULT_GROUP
+      - optional:nacos:consumer.yaml?group=${spring.application.name}
+  cloud:
+    config:
+      enabled: false
+    nacos:
+      server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+      username: ${NACOS_USERNAME:}
+      password: ${NACOS_PASSWORD:}
+      discovery:
+        enabled: true
+        namespace: ${NACOS_NAMESPACE:local}
+      config:
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE:local}
+
+backend-demo:
+  feign:
+    server-name: backend-demo-server

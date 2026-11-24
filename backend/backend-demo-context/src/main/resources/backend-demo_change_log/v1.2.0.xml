@@ -1,0 +1,14 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+    <changeSet author="zchengli" id="20261118-02-filter-page-index">
+        <dropIndex indexName="idx_backend_demo_order_customer_status" tableName="backend_demo_order"/>
+        <createIndex indexName="idx_backend_demo_order_filter_page" tableName="backend_demo_order">
+            <column name="customer_id"/>
+            <column name="status"/>
+            <column name="created_time"/>
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

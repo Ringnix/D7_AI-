@@ -1,0 +1,521 @@
+{
+  "info": {
+    "_postman_id": "4a57f2b9-6a48-4e6e-bc70-cc6a6794464f",
+    "name": "订单管理接口回归",
+    "description": "订单 CRUD、分页、校验、Hello 请求链路和 B 服务 Feign 调用",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "aBaseUrl",
+      "value": "http://127.0.0.1:8081"
+    },
+    {
+      "key": "bBaseUrl",
+      "value": "http://127.0.0.1:8082"
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "orderNo",
+      "value": ""
+    },
+    {
+      "key": "seedOrderId",
+      "value": "910000000000000002"
+    }
+  ],
+  "item": [
+    {
+      "name": "A - 创建订单",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Request-Id",
+            "value": "{{$guid}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderNo\": \"{{orderNo}}\",\n  \"customerId\": 2001,\n  \"amount\": 199.90,\n  \"status\": \"CREATED\"\n}"
+        },
+        "url": {
+          "raw": "{{aBaseUrl}}/orders",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.collectionVariables.get('orderNo')) {",
+              "  pm.collectionVariables.set('orderNo', 'ORDER-' + Date.now());",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('创建成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().success).to.eql(true);",
+              "});",
+              "const match = pm.response.text().match(/\"data\":\\s*\"?(\\d+)\"?/);",
+              "pm.expect(match, '响应必须包含订单ID').to.not.be.null;",
+              "pm.collectionVariables.set('orderId', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 查询订单详情",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('详情查询成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json().data;",
+              "  pm.expect(data.orderNo).to.eql(pm.collectionVariables.get('orderNo'));",
+              "  pm.expect(Number(data.amount)).to.eql(199.9);",
+              "  pm.expect(data.status).to.eql('CREATED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 分页查询",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/orders?current=1&pageSize=20",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ],
+          "query": [
+            {
+              "key": "current",
+              "value": "1"
+            },
+            {
+              "key": "pageSize",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('分页契约一致', () => {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json().data;",
+              "  pm.expect(Number(data.total)).to.be.at.least(data.datas.length);",
+              "  pm.expect(data.datas.length).to.be.at.most(20);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 修改订单",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderNo\": \"{{orderNo}}\",\n  \"customerId\": 2001,\n  \"amount\": 299.90,\n  \"status\": \"PAID\"\n}"
+        },
+        "url": {
+          "raw": "{{aBaseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('修改成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().success).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 修改后查询",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('修改结果已持久化', () => {",
+              "  const data = pm.response.json().data;",
+              "  pm.expect(Number(data.amount)).to.eql(299.9);",
+              "  pm.expect(data.status).to.eql('PAID');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 重复订单号冲突",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderNo\": \"{{orderNo}}\",\n  \"customerId\": 2001,\n  \"amount\": 199.90,\n  \"status\": \"CREATED\"\n}"
+        },
+        "url": {
+          "raw": "{{aBaseUrl}}/orders",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('订单号冲突语义', () => {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().errorCode).to.eql('90000101');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 参数校验反例",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderNo\": \"\",\n  \"customerId\": 0,\n  \"amount\": -1,\n  \"status\": \"CREATED\"\n}"
+        },
+        "url": {
+          "raw": "{{aBaseUrl}}/orders",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('参数校验失败', () => {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 删除订单",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('删除成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().success).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - 删除后查询",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('删除后返回不存在', () => {",
+              "  pm.response.to.have.status(404);",
+              "  pm.expect(pm.response.json().errorCode).to.eql('90000102');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - Hello 请求链路",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{aBaseUrl}}/demo/hello?name=World",
+          "host": [
+            "{{aBaseUrl}}"
+          ],
+          "path": [
+            "demo",
+            "hello"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "World"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Hello 请求链路成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data.message).to.eql('Hello, World!');",
+              "  pm.expect(body.data.timestamp).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "B - Feign 查询详情",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{bBaseUrl}}/consumer/orders/{{seedOrderId}}",
+          "host": [
+            "{{bBaseUrl}}"
+          ],
+          "path": [
+            "consumer",
+            "orders",
+            "{{seedOrderId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Feign 调用成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().data.orderNo).to.eql('DEMO-ORDER-2026111802');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "B - Feign 分页查询",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{bBaseUrl}}/consumer/orders?current=1&pageSize=20",
+          "host": [
+            "{{bBaseUrl}}"
+          ],
+          "path": [
+            "consumer",
+            "orders"
+          ],
+          "query": [
+            {
+              "key": "current",
+              "value": "1"
+            },
+            {
+              "key": "pageSize",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Feign 分页成功', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().data.current).to.eql(1);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "B - Feign 订单不存在",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{bBaseUrl}}/consumer/orders/999999999999999999",
+          "host": [
+            "{{bBaseUrl}}"
+          ],
+          "path": [
+            "consumer",
+            "orders",
+            "999999999999999999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Feign 保留订单不存在语义', () => {",
+              "  pm.response.to.have.status(404);",
+              "  pm.expect(pm.response.json().errorCode).to.eql('90000102');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

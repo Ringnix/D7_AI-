@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+	<springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+	<springProperty scope="context" name="LOG_DIR" source="log.dir" defaultValue="/logs"/>
+	<springProperty scope="context" name="LOG_MAX_HISTORY" source="log.max-history" defaultValue="0"/>
+	<springProperty scope="context" name="LOG_MAX_FILE_SIZE" source="log.max-file-size" defaultValue="100MB"/>
+
+	<property name="PATTERN" value="[%d{yyyy-MM-dd HH:mm:ss.SSSXXX}] [%p] [%tid] [${APP_NAME}] [%thread] [%logger{36}] - %msg%n" />
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+				<pattern>${PATTERN}</pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<appender name="sw-grpc-log" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.TraceIdMDCPatternLogbackLayout">
+				<pattern>${PATTERN}</pattern>
+			</layout>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<!-- 设置过滤级别 -->
+			<level>WARN</level>
+			<!-- WARN等级接受处理-->
+			<onMatch>ACCEPT</onMatch>
+			<!-- 不是WARN等级的标识为未决定，让下游过滤器做判断 -->
+			<onMismatch>NEUTRAL</onMismatch>
+		</filter>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<!-- 设置过滤级别 -->
+			<level>ERROR</level>
+			<!-- ERROR等级接受处理-->
+			<onMatch>ACCEPT</onMatch>
+			<!-- 非ERROR等级不处理 -->
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<springProfile name="skywalking">
+		<!--通过异步grpc方式提交到skywalking-->
+		<appender name="async-sw-grpc-log" class="ch.qos.logback.classic.AsyncAppender">
+			<!-- ref值与上面的appender标签的name相对应 -->
+			<appender-ref ref="sw-grpc-log" />
+		</appender>
+	</springProfile>
+
+	<springProfile name="!skywalking">
+		<appender name="async-sw-grpc-log" class="ch.qos.logback.core.helpers.NOPAppender">
+		</appender>
+	</springProfile>
+
+	<springProfile name="!prd">
+		<logger name="com.cyberway.mp.demo.backenddemo" level="DEBUG"/>
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="async-sw-grpc-log"/>
+		</root>
+	</springProfile>
+	<springProfile name="prd">
+		<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<file>${LOG_DIR}/${APP_NAME}.log</file>
+			<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+				<fileNamePattern>${LOG_DIR}/${APP_NAME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+				<maxFileSize>${LOG_MAX_FILE_SIZE}</maxFileSize>
+				<!-- 日志最大保留天数, 单位为小时, 0表示不限制 -->
+				<maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+			</rollingPolicy>
+			<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+				<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+					<pattern>${PATTERN}</pattern>
+				</layout>
+			</encoder>
+		</appender>
+		<logger name="com.cyberway.mp.demo.backenddemo" level="INFO"/>
+		<root level="WARN">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="ROLLING"/>
+			<appender-ref ref="async-sw-grpc-log"/>
+		</root>
+	</springProfile>
+</configuration>

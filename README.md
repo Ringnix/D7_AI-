@@ -1,93 +1,125 @@
-# D7_AI全流程实践
+# D7 AI 协同开发全流程交付 · 采购申请单模块
 
+基于已有中台前端（Vue3 + Vite + `cyberway-middle-ui-components`）与 Spring Boot 后端（`backend-demo`）完成的采购申请单模块，覆盖：
+需求分析 → 技术设计 → 任务编排 → 前后端开发 → 单元测试 → Code Review → 接口测试 → UI 联调 → 文档与 Skill 提炼。
 
+## 仓库结构
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+```text
+.
+├── docs/                     # AI 协同开发全过程文档（00~09）
+│   ├── 00-prompt/            # 总控 Prompt、Prompt 记录、项目盘点
+│   ├── 01-requirement/       # 需求文档、澄清与评审
+│   ├── 02-design/            # 技术设计、ER 图、表结构、接口清单、改动清单
+│   ├── 03-plan/              # 改动清单、任务编排、任务看板
+│   ├── 04-dev/               # 代码变更说明、单测记录、编译启动记录
+│   ├── 05-test/接口测试/      # 用例、seed、响应证据、接口测试报告、日志排查
+│   ├── 06-review/            # Code Review 与修复记录
+│   ├── 07-ui/                # UI 用例、联调记录、UI 结果、菜单与访问地址、截图
+│   ├── 08-skill/skills/      # 4 个可复用 Skill
+│   └── 09-final/             # 过程记录、交付说明、完成度清单、未验证项
+├── backend/                  # 后端源码（Spring Boot 多模块）
+│   ├── backend-demo-api/     # 接口、DTO、VO、枚举
+│   ├── backend-demo-context/ # 实体、仓储、领域/应用服务、Liquibase
+│   ├── backend-demo-starter/ # Controller、异常处理
+│   ├── backend-demo-server/  # 服务 A 启动模块
+│   └── ...                   # consumer/feign/starter 等既有模块
+└── frontend/                 # 前端源码（Vue3 + Vite 中台模板）
+    ├── src/service/purchase-request/  # 接口封装与类型
+    ├── src/views/purchase-request/    # 列表/表单/详情/动作弹框/状态标签
+    ├── src/router/purchase-request.ts # 路由
+    ├── src/locales/                   # 中英文文案
+    └── scripts/serve-uc.mjs           # 本地启动用户中心（菜单/资源/角色配置）
 ```
-cd existing_repo
-git remote add origin https://gitlab.cyberway.com.cn/vstar/2026/d7_ai.git
-git branch -M main
-git push -uf origin main
+
+## 功能与状态流转
+
+- 主子表：采购申请单主表 + 多条采购明细
+- 分页查询（申请单号/标题/状态筛选）、详情、新增/编辑/删除、提交、撤回、取消、审批通过、审批驳回
+- 状态机：`DRAFT(草稿) -> SUBMITTED(待审批) -> APPROVED(通过)/REJECTED(驳回)`；草稿/待审批可取消，待审批可撤回为草稿
+- 取消原因、驳回原因必填；审批仅记录状态与审批信息，不接中台审批流
+- 乐观锁：主表 `version`，所有写操作条件更新，冲突返回 `90000206`
+- 权限：仅按单据状态控制按钮；未接中台权限码/租户过滤（见未验证项）
+
+## 技术栈
+
+| 端 | 技术 |
+| --- | --- |
+| 前端 | Vue 3.2、Vite 5、TypeScript、Ant Design Vue 3.2、mp-cli 1.23.0、CTable/useTable |
+| 后端 | Spring Boot 3.4.8、Java 17、MyBatis + 中台 DAL、Liquibase、Jakarta Validation、Swagger |
+| 数据库 | MySQL 8.0（Liquibase 自动建表） |
+
+## 本地运行
+
+### 1. 数据库
+
+准备 MySQL 8.0，创建空库（示例库名 `java_simulation_project`），表结构与样例由后端 Liquibase 自动执行。
+
+### 2. 后端
+
+```powershell
+cd backend
+mvn clean package -DskipTests
+$env:SERVER_PORT='8081'
+$env:DB_URL='jdbc:mysql://<MySQL地址>:3306/<库名>?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai'
+$env:DB_USERNAME='<用户名>'
+$env:DB_PASSWORD='<密码>'
+$env:NACOS_ENABLED='false'   # 本地无 Nacos 时关闭注册/配置中心
+java -Dfile.encoding=UTF-8 -jar backend-demo-server/target/backend-demo-server-0.0.1-SNAPSHOT.jar
 ```
 
-## Integrate with your tools
+- 接口端口：`8081`
+- Liquibase 会执行 `backend-demo_change_log/v1.3.0.xml` 创建采购申请单表
 
-- [ ] [Set up project integrations](https://gitlab.cyberway.com.cn/vstar/2026/d7_ai/-/settings/integrations)
+### 3. 前端
 
-## Collaborate with your team
+```powershell
+cd frontend
+yarn
+yarn dev
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+- 访问：`http://localhost:3000`
+- 采购申请单页面（无菜单权限时可直接访问）：`http://localhost:3000/#/purchase-request/list`
+- 开发代理：`/api/purchase-requests` → `http://127.0.0.1:8081`
 
-## Test and Deploy
+### 4. 用户中心（菜单/资源/角色配置，可选）
 
-Use the built-in continuous integration in GitLab.
+已引入公司私库包 `cyberway-mp-uc-web@1.23.0`：
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```powershell
+cd frontend
+yarn uc:serve
+```
 
-***
+访问 `http://127.0.0.1:3001/`，登录后配置应用菜单资源；如无授权权限，直接使用上面的页面 URL。
 
-# Editing this README
+## 测试与验证结果
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| 类型 | 结果 |
+| --- | --- |
+| 后端单元测试 `mvn test` | 30/30 PASS（新增 19 个） |
+| 接口测试（curl.exe） | 32/32 PASS，两轮共 64 次请求 |
+| 并发/乐观锁 | 同版本并发提交 200/409 |
+| 后端日志 | ERROR=0（负向用例 WARN 为预期） |
+| 前端 ESLint / Stylelint / 构建 | 0 error，生产构建成功 |
+| UI 联调 | 列表、状态化按钮、详情、新增表单、取消原因弹框已验证（4 张截图） |
 
-## Suggestions for a good README
+## 文档入口
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- 完成度清单：[docs/09-final/完成度清单.md](docs/09-final/完成度清单.md)
+- 过程记录（含提示词/返工统计）：[docs/09-final/AI协同开发过程记录.md](docs/09-final/AI协同开发过程记录.md)
+- 未验证与人工确认项：[docs/09-final/人工确认与未验证项.md](docs/09-final/人工确认与未验证项.md)
+- 接口测试报告：[docs/05-test/接口测试/接口测试报告.md](docs/05-test/接口测试/接口测试报告.md)
+- 菜单与访问地址：[docs/07-ui/菜单与访问地址.md](docs/07-ui/菜单与访问地址.md)
 
-## Name
-Choose a self-explaining name for your project.
+## 已知限制（如实说明）
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. 前端“新增/编辑保存”完整点击链路未自动化，保留人工验证清单（接口层已覆盖）。
+2. 未接中台真实权限码/租户过滤，按钮仅按单据状态显隐。
+3. 容器化部署时前端 nginx 需自行反代 `/api/purchase-requests` 到后端。
+4. 审批仅记录状态，不接入中台工作流。
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## 作者
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+大数据事业部 · 钟承礼 · 2026-11

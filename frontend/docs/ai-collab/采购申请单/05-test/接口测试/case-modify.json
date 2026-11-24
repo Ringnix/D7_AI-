@@ -1,0 +1,15 @@
+{
+    "department":  "研发部",
+    "version":  0,
+    "applicantName":  "测试员甲",
+    "remark":  "修改后",
+    "items":  [
+                  {
+                      "itemName":  "鼠标",
+                      "unitPrice":  10,
+                      "quantity":  3,
+                      "unit":  "个"
+                  }
+              ],
+    "title":  "测试采购申请A-修改"
+}

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyberway.mp.demo.backenddemo.domain.purchase.repository.PurchaseRequestRepository">
+
+    <resultMap id="PurchaseRequestResultMap" type="com.cyberway.mp.demo.backenddemo.domain.purchase.entity.PurchaseRequest">
+        <id property="id" column="id"/>
+        <result property="createdUserId" column="created_user_id"/>
+        <result property="createdUserName" column="created_user_name"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="lastModifiedUserId" column="last_modified_user_id"/>
+        <result property="lastModifiedUserName" column="last_modified_user_name"/>
+        <result property="lastModifiedTime" column="last_modified_time"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="businessZoneId" column="business_zone_id"/>
+        <result property="appInstanceId" column="app_instance_id"/>
+        <result property="requestNo" column="request_no"/>
+        <result property="title" column="title"/>
+        <result property="applicantName" column="applicant_name"/>
+        <result property="department" column="department"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="version" column="version"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelledTime" column="cancelled_time"/>
+        <result property="approvalUserId" column="approval_user_id"/>
+        <result property="approvalUserName" column="approval_user_name"/>
+        <result property="approvalTime" column="approval_time"/>
+        <result property="approvalOpinion" column="approval_opinion"/>
+    </resultMap>
+
+    <sql id="PurchaseRequestColumns">
+        id,
+        created_user_id,
+        created_user_name,
+        created_time,
+        last_modified_user_id,
+        last_modified_user_name,
+        last_modified_time,
+        tenant_id,
+        business_zone_id,
+        app_instance_id,
+        request_no,
+        title,
+        applicant_name,
+        department,
+        total_amount,
+        status,
+        remark,
+        version,
+        cancel_reason,
+        cancelled_time,
+        approval_user_id,
+        approval_user_name,
+        approval_time,
+        approval_opinion
+    </sql>
+
+    <sql id="PurchaseRequestFilters">
+        <where>
+            <if test="query.requestNoLike != null and query.requestNoLike != ''">
+                and request_no like concat('%', #{query.requestNoLike}, '%')
+            </if>
+            <if test="query.titleLike != null and query.titleLike != ''">
+                and title like concat('%', #{query.titleLike}, '%')
+            </if>
+            <if test="query.status != null">
+                and status = #{query.status}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countPurchaseRequest" resultType="long">
+        select count(1)
+        from backend_demo_purchase_request
+        <include refid="PurchaseRequestFilters"/>
+    </select>
+
+    <select id="searchPurchaseRequest" resultMap="PurchaseRequestResultMap">
+        select
+        <include refid="PurchaseRequestColumns"/>
+        from backend_demo_purchase_request
+        <include refid="PurchaseRequestFilters"/>
+        order by created_time desc, id desc
+        limit #{pageParam.pageSize} offset #{pageParam.offset}
+    </select>
+
+    <update id="updatePurchaseRequest">
+        update backend_demo_purchase_request
+        set title = #{request.title},
+            applicant_name = #{request.applicantName},
+            department = #{request.department},
+            remark = #{request.remark},
+            total_amount = #{request.totalAmount},
+            status = #{request.status},
+            cancel_reason = #{request.cancelReason},
+            cancelled_time = #{request.cancelledTime},
+            approval_user_id = #{request.approvalUserId},
+            approval_user_name = #{request.approvalUserName},
+            approval_time = #{request.approvalTime},
+            approval_opinion = #{request.approvalOpinion},
+            version = version + 1,
+            last_modified_time = current_timestamp
+        where id = #{request.id}
+          and version = #{version}
+    </update>
+</mapper>

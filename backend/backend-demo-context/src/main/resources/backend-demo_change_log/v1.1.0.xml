@@ -1,0 +1,84 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+    <changeSet author="zchengli" id="20261118-01-create-order-table">
+        <createTable remarks="订单表" tableName="backend_demo_order">
+            <column name="id" remarks="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="created_user_id" remarks="创建用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="created_user_name" remarks="创建用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_time" remarks="创建时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="last_modified_user_id" remarks="最后修改用户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="last_modified_user_name" remarks="最后修改用户名" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="last_modified_time" remarks="最后修改时间" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="tenant_id" remarks="租户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="business_zone_id" remarks="业务空间ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="app_instance_id" remarks="应用实例ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_no" remarks="订单号" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" remarks="客户ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" remarks="订单金额" type="DECIMAL(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" remarks="订单状态" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                columnNames="order_no"
+                constraintName="uk_backend_demo_order_order_no"
+                tableName="backend_demo_order"/>
+
+        <createIndex indexName="idx_backend_demo_order_created" tableName="backend_demo_order">
+            <column name="created_time"/>
+            <column name="id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_backend_demo_order_customer_status" tableName="backend_demo_order">
+            <column name="customer_id"/>
+            <column name="status"/>
+        </createIndex>
+
+        <sql>
+            insert into backend_demo_order
+                (id, created_user_id, created_user_name, created_time,
+                 last_modified_user_id, last_modified_user_name, last_modified_time,
+                 tenant_id, business_zone_id, app_instance_id,
+                 order_no, customer_id, amount, status)
+            values
+                (910000000000000001, 0, 'system', current_timestamp,
+                 0, 'system', current_timestamp,
+                 0, 0, 0, 'DEMO-ORDER-2026111801', 1001, 128.50, 'CREATED'),
+                (910000000000000002, 0, 'system', current_timestamp,
+                 0, 'system', current_timestamp,
+                 0, 0, 0, 'DEMO-ORDER-2026111802', 1002, 299.00, 'PAID'),
+                (910000000000000003, 0, 'system', current_timestamp,
+                 0, 'system', current_timestamp,
+                 0, 0, 0, 'DEMO-ORDER-2026111803', 1003, 59.90, 'CANCELLED');
+        </sql>
+    </changeSet>
+</databaseChangeLog>
